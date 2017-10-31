@@ -43,10 +43,10 @@ pipeline {
     }
     stage("Test on Debian") {
       agent {
-        node {
+        docker {
+          image 'openjdk:8u121-jre'
           label 'CentOS'
         }
-        docker 'openjdk:8u121-jre'
       }
       steps {
         sh "wget http://hoooober1.mylabserver.com/rectangles/all/rectangle_${env.BUILD_NUMBER}.jar"
