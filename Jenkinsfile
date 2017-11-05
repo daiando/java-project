@@ -1,6 +1,13 @@
 pipeline {
   agent none
 
+  environment {
+    MAJOR_VERSION = 1
+    DIST = "/var/www/html/rectangles/all/${env.BRANCH_NAME}"
+    SERVER = "http://hoooober1.mylabserver.com/rectangles"
+    LOCATION = "/var/www/html/rectangles"
+  }
+
   stages {
     stage('Unit Tests') {
       agent {
@@ -29,8 +36,8 @@ pipeline {
         label 'apache'
       }
       steps {
-        sh "if ![ -d '/var/www/html/rectangles/all/${env.BRANCH_NAME}' ]; then mkdir /var/www/html/rectangles/all/${env.BRANCH_NAME}; fi"
-        sh "cp dist/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/all/${env.BRANCH_NAME}/"
+        sh "if ![ -d ${env.DIST} ]; then mkdir ${env.DIST}; fi"
+        sh "cp dist/rectangle_{env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar ${env.LOCATION}/all/${env.BRANCH_NAME}/"
       }
     }
     stage('Running on CentOS') {
@@ -38,8 +45,8 @@ pipeline {
         label 'CentOS'
       }
       steps {
-        sh "wget http://hoooober1.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
-        sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
+        sh "wget ${env.DIST}/all/${env.BRANCH_NAME}/rectangle_{env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar"
+        sh "java -jar rectangle_{env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar 3 4"
       }
     }
     stage("Test on Debian") {
@@ -50,8 +57,8 @@ pipeline {
         }
       }
       steps {
-        sh "wget http://hoooober1.mylabserver.com/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar"
-        sh "java -jar rectangle_${env.BUILD_NUMBER}.jar 3 4"
+        sh "wget ${env.DIST}/all/${env.BRANCH_NAME}/rectangle_{env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar"
+        sh "java -jar rectangle_{env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar 3 4"
       }
     }
     stage('Promote to Green') {
@@ -62,7 +69,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        sh "cp /var/www/html/rectangles/all/${env.BRANCH_NAME}/rectangle_${env.BUILD_NUMBER}.jar /var/www/html/rectangles/green/rectangle_${env.BUILD_NUMBER}.jar"
+        sh "cp ${env.LOCATION}/all/${env.BRANCH_NAME}/rectangle_{env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar ${env.LOCATION}/green/rectangle_{env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar"
       }
     }
     stage('Promote Dev branch to Master') {
@@ -85,6 +92,9 @@ pipeline {
         sh 'git merge development'
         echo 'Pushing to Origin Master'
         sh 'git push origin master'
+        echo 'Tagging the Release'
+        sh "git tag rectangle-{env.MAJOR_VERSION}.${env.BUILD_NUMBER}"
+        sh 'git push origin rectangle-{env.MAJOR_VERSION}.${env.BUILD_NUMBER}'
       }
     }
   }
