@@ -36,7 +36,7 @@ pipeline {
         label 'apache'
       }
       steps {
-        sh "if ![ -d ${env.DIST} ]; then mkdir ${env.DIST}; fi"
+        sh "if ![ -d '${env.DIST}' ]; then mkdir ${env.DIST}; fi"
         sh "cp dist/rectangle_${env.MAJOR_VERSION}.${env.BUILD_NUMBER}.jar ${env.LOCATION}/all/${env.BRANCH_NAME}/"
       }
     }
