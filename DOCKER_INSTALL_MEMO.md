@@ -19,7 +19,16 @@ yum install docker-ce
 ### 2. confirm
 
 - add jenkins user to docker group
+- start docker process
 
 ```
 gpasswd -a jenkins docker
+systemctl start docker
+```
+
+
+### 3. preparing on jenkins master
+
+```
+systemctl restart jenkins
 ```
