@@ -18,7 +18,8 @@ yum install docker-ce
 
 ### 2. confirm
 
+- add jenkins user to docker group
 
 ```
-
+gpasswd -a jenkins docker
 ```
